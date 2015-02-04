@@ -2,7 +2,7 @@ package org.usfirst.frc.team245.robot;
 
 import edu.wpi.first.wpilibj.CameraServer;
 
-
+//NATHAN HAS A BIG BRAIN
 public class Cameras extends Thread{
 	static CameraServer server1;
 	static CameraServer server0;
