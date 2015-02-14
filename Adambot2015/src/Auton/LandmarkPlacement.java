@@ -14,8 +14,8 @@ public class LandmarkPlacement {
 		stage = 0;
 	}
 	public static void update(){
-		SmartDashboard.putDouble("timer", rollerTimer.get());
-		SmartDashboard.putInt("stage:", stage);
+		SmartDashboard.putNumber("timer", rollerTimer.get());
+		SmartDashboard.putNumber("stage:", stage);
 		if(stage == 0){
 			//Interior.Interior.toggleRollers(1);
 			if(rollerTimer.get()>.5){
@@ -77,6 +77,6 @@ public class LandmarkPlacement {
 		}
 	}
 	public static void stage4(){
-		//Drive.Drive.DriveSpeed(0, +.6, 0);
+		Drive.Drive.DriveSpeed(0, +.6, 0);
 	}
 }

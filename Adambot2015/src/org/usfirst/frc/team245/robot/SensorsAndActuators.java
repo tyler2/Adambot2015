@@ -1,14 +1,14 @@
 package org.usfirst.frc.team245.robot;
 
 import edu.wpi.first.wpilibj.*;
-public class SensorsAndActuators {
+public final class SensorsAndActuators {
 	//declare and initialize all sensors and actuators
 /*SENSORS-----------------------------------------------------------------------------------------------*/
 	
 	public static Gyro gyro;
-	public static Encoder exteriorArmEncoder;
-	public static Encoder interiorArmEncoder;
-	public static Encoder exteriorRotationEncoder;
+	public static Encoder exteriorManipulator;
+	public static Encoder interiorManipulator;
+	
 	public static DigitalInput autonSwitch1;
 	public static DigitalInput autonSwitch2;
 	public static DigitalInput autonSwitch3;
@@ -16,55 +16,67 @@ public class SensorsAndActuators {
 	public static DigitalInput exteriorBottomLimit;
 	public static DigitalInput interiorTopLimit;
 	public static DigitalInput interiorBottomLimit;
-	
+	public static DigitalInput photoEyeInternal;
+	public static DigitalInput photoEyeExternal;
+	public static Compressor compressor;
+	public static AnalogPotentiometer exteriorRotationEncoder;
 /*ACTUATORS---------------------------------------------------------------------------------------------*/
 	public static Talon leftFrontDrive;
 	public static Talon rightFrontDrive;
-	public static Talon leftBackDrive;
-	public static Talon rightBackDrive;
+	public static Talon leftRearDrive;
+	public static Talon rightRearDrive;
 	public static Victor leftToteFeederMotor;
 	public static Victor rightToteFeederMotor;
 	public static Victor interiorLiftMotor;
 	public static Victor exteriorLiftMotor;
 	public static Victor exteriorRotationMotor;
-	public static DoubleSolenoid exteriorPiston;
-	public static DoubleSolenoid rollerPiston;
-	public static Solenoid interiorClamp;
-	public static Solenoid interiorRatchet;
-	public static Solenoid exteriorVerticalBrake;
-	public static Solenoid exteriorRotationalBrake;
+	public static DoubleSolenoid totePiston;
+	public static DoubleSolenoid exteriorArmPiston;
+	public static Solenoid clampPiston;
+	public static Solenoid ratchetPiston;
+	public static Solenoid liftBrake;
+	public static Solenoid angleBrake;
+	
+	//OTHER
+	public static PowerDistributionPanel currentPDP;
 	
 	
 /*INITIALIZATION----------------------------------------------------------------------------------------*/
 	public static void initialize(){
 		//Sensors
-		gyro = new Gyro(1);
-		exteriorArmEncoder = new Encoder(1,1);
-		exteriorRotationEncoder = new Encoder(1,1);
-		interiorArmEncoder = new Encoder(1,1);
-		autonSwitch1 = new DigitalInput(1); 
-		autonSwitch2 = new DigitalInput(1);
-		autonSwitch3 = new DigitalInput(1);
-		exteriorTopLimit = new DigitalInput(2); //confirmed
+		gyro = new Gyro(0);
+		
+		exteriorManipulator = new Encoder(0,1);		
+		//Untested		
+		interiorManipulator = new Encoder(2,3);		
+		exteriorTopLimit = new DigitalInput(4); //confirmed
 		exteriorBottomLimit = new DigitalInput(5); //confirmed
-		interiorTopLimit = new DigitalInput(2); //confirmed
-		interiorBottomLimit = new DigitalInput(5); //confirmed
+		interiorTopLimit = new DigitalInput(6); //confirmed
+		interiorBottomLimit = new DigitalInput(7); //confirmed
+		photoEyeInternal = new DigitalInput(8);
+		photoEyeInternal = new DigitalInput(9);
 		//Actuators
-		leftFrontDrive = new Talon(1);
-		rightFrontDrive = new Talon(1);
-		leftBackDrive = new Talon(1);
-		rightBackDrive = new Talon(1);
-		leftToteFeederMotor = new Victor(1);
-		rightToteFeederMotor = new Victor(1);
-		interiorLiftMotor = new Victor(1);
-		exteriorRotationMotor = new Victor(1);
-		exteriorPiston = new DoubleSolenoid(1,1);
-		rollerPiston = new DoubleSolenoid(1,1);
-		exteriorVerticalBrake = new Solenoid(1);
-		exteriorRotationalBrake = new Solenoid(1);
-		interiorClamp = new Solenoid(1);
-		interiorRatchet = new Solenoid(1);
-		exteriorLiftMotor = new Victor(1);
+		leftFrontDrive = new Talon(0);
+		rightFrontDrive = new Talon(2);
+		leftRearDrive = new Talon(1);
+		rightRearDrive = new Talon(3);	
+		exteriorRotationEncoder = new AnalogPotentiometer(1);
+		leftToteFeederMotor = new Victor(5);
+		rightToteFeederMotor = new Victor(4);
+		interiorLiftMotor = new Victor(6);
+		exteriorRotationMotor = new Victor(8);
+		exteriorLiftMotor = new Victor(7);
+		
+		//Solenoids
+		totePiston = new DoubleSolenoid(0,1);//untested
+		exteriorArmPiston = new DoubleSolenoid(4,5);//untested
+		liftBrake = new Solenoid(6);
+		angleBrake = new Solenoid(7);
+		clampPiston = new Solenoid(2);
+		ratchetPiston = new Solenoid(1);
+		
+		compressor = new Compressor();
+		currentPDP = new PowerDistributionPanel();
 	}
 	
 }

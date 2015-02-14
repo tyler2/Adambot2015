@@ -1,6 +1,4 @@
 package Auton;
-
-import edu.wpi.first.wpilibj.Timer;
 	//Assumess that robot is placed in line with tote and container on the x axis
 	//that the tote is placed first, and a positive x will move roller end first
 public class ToteThenContainer {

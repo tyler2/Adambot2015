@@ -1,108 +1,237 @@
 package Interior;
 
+import org.usfirst.frc.team245.robot.SensorsAndActuators;
+
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Interior {
-	/**
-	 * 
-	 * @param speed set the motor to this speed also do some current checking
-	 */
-	
-	
-	/**
-	 * 
-	 * @param speed set the motor to this speed also do some current checking
-	 */
-	
-	private static double interiorEncoderMax = 6.2830; //needs to be tested
-	private static double interiorEncoderMin = 0;
-	private static PowerDistributionPanel current = new PowerDistributionPanel();
-	public static double amps;
-	/*public static void toggleRollers(int leftSpeed, int rightSpeed){ //1 = in, -1 = out, 0 = stop
-		//apparently part of drive train?
-		org.usfirst.frc.team245.robot.SensorsAndActuators.leftToteFeederMotor.set(leftSpeed);
-		org.usfirst.frc.team245.robot.SensorsAndActuators.rightToteFeederMotor.set(rightSpeed);
+	private static double INTERIOR_ENCODER_MAX = 1000; // needs to be tested
+	private static double INTERIOR_ENCODER_MIN = 0;
+	private static double TOTE_ENCODER_HEIGHT = 100;
+	private static double MAX_AMPS = 2;
+	private static Timer currentTimer = new Timer(); // NOT SURE WHERE TO PUT
+														// THIS
+	private static Timer intakeTimer = new Timer();
+	private static Timer outputTimer = new Timer();
+	// private static boolean CURRENT_FAIL = false;
+	private static double MAX_CURRENT_FAIL_TIME = 0.5; // in seconds
+	private static double MOTOR_COOLDOWN_TIME = 2.5; // in seconds
+	private static double LIVE_CURRENT_FAIL_TIME = 0; // in seconds
+	private static boolean RESET_MOTOR_BEGIN = false;
+	// private static double EXPECTED_ITERATION = 0;
+	// private static double CURRENT_ITERATION = 0;
+	private static double ARM_MOVE_SPEED = .8;
+	private static int PDP_PORT = 3;
+	private static int intakeStage = 0;
+	private static int outputStage = 0;
+	public static void toggleRollers(double leftSpeed, double rightSpeed) { // 1 = in,
+																		// -1 =
+																		// out,
+																		// 0 =
+																		// stop
+		// apparently part of drive train?
+		SensorsAndActuators.leftToteFeederMotor.set(leftSpeed);
+		SensorsAndActuators.rightToteFeederMotor.set(rightSpeed);
 	}
-	
-	public static double currentEncoder(){
-		return org.usfirst.frc.team245.robot.SensorsAndActuators.interiorArmEncoder.get(); //Debjit is Scott's slut.
+
+	public static double getCurrentEncoder() {
+		return SensorsAndActuators.interiorManipulator.get();
 	}
-	
-	//sets the motor speeds of both arms
-	public static void moveArm(double speed){ //+=up -=down
-		//issues with encoder skipping, unsure for max and min values
-		//SensorsAndActuators.interiorLiftMotor.set(speed);
-		if(speed > 0){
-			org.usfirst.frc.team245.robot.SensorsAndActuators.interiorLiftMotor.set(speed);
-		}
-		if(speed < 0){
-			while(currentEncoder() >= interiorEncoderMin){
-				org.usfirst.frc.team245.robot.SensorsAndActuators.interiorLiftMotor.set(speed);
+
+	// sets the motor speeds of both arms
+	public static void moveArm(double speed) { // +=up -=down
+		// issues with encoder skipping, unsure for max and min values
+		// SensorsAndActuators.interiorLiftMotor.set(speed);
+		if (speed > 0) {
+			if (getCurrentEncoder() <= INTERIOR_ENCODER_MAX
+					&& !SensorsAndActuators.interiorTopLimit.get()) {// &&not
+																		// the
+																		// top
+																		// limit
+																		// switch
+				SensorsAndActuators.interiorLiftMotor.set(speed);
+			} else {
+				SensorsAndActuators.interiorLiftMotor.set(0);
+			}
+		} else {
+			if (getCurrentEncoder() >= INTERIOR_ENCODER_MIN
+					&& !SensorsAndActuators.interiorBottomLimit.get()) {
+				SensorsAndActuators.interiorLiftMotor.set(speed);
+			} else {
+				SensorsAndActuators.interiorLiftMotor.set(0);
 			}
 		}
+
 	}
-	
-	public static void toggleArm(boolean isCompressed) {
-		if (isCompressed) { //currently closed
-			//open Arms
-			org.usfirst.frc.team245.robot.SensorsAndActuators.leftArmCloser.set(true);
-			org.usfirst.frc.team245.robot.SensorsAndActuators.rightArmCloser.set(true);
-			
-		} else { //currently opened
-			//close Arms
-			org.usfirst.frc.team245.robot.SensorsAndActuators.leftArmCloser.set(false);
-			org.usfirst.frc.team245.robot.SensorsAndActuators.rightArmCloser.set(false);
+
+	public static void toggleRatchet(boolean isCompressed) {
+		if (isCompressed) { // currently closed
+			// open Arms
+			SensorsAndActuators.ratchetPiston.set(true);
+
+		} else { // currently opened
+			// close Arms
+			SensorsAndActuators.ratchetPiston.set(false);
 		}
 	}
-	
-	//clamps using the piston
-	public static void toggleClamps(boolean isCompressed){
-		if (isCompressed) { //currently closed
-			//open Arms
-			org.usfirst.frc.team245.robot.SensorsAndActuators.toteClamp.set(false);
-		} else { //currently open
-			//close Arms
-			org.usfirst.frc.team245.robot.SensorsAndActuators.toteClamp.set(true);
+
+	// clamps using the piston
+	public static void toggleClamps(boolean isCompressed) {
+		if (isCompressed) { // currently closed
+			// open Arms
+			SensorsAndActuators.clampPiston.set(false);
+		} else { // currently open
+			// close Arms
+			SensorsAndActuators.clampPiston.set(true);
 		}
 	}
+
+	
+	public static void currentCheck() { // each iteration = 20 milliseconds
+		// take special action if motor stalls
+		double current = SensorsAndActuators.currentPDP.getCurrent(PDP_PORT);
+		SmartDashboard.putNumber("Current value", current);
+
+		if (current >= MAX_AMPS) {
+			currentTimer.start();
+			LIVE_CURRENT_FAIL_TIME += 0.02;
+		}
+
+		if (LIVE_CURRENT_FAIL_TIME - 0.05 < currentTimer.get() * 0.02
+				&& currentTimer.get() * 0.02 < LIVE_CURRENT_FAIL_TIME + 0.05) {
+			if (currentTimer.get() >= MAX_CURRENT_FAIL_TIME) {
+				SmartDashboard.putString("rollerError",
+						"ERROR: ROLLER MOTOR STALLED");
+
+				RESET_MOTOR_BEGIN = true;
+			}
+		} else {
+			currentTimer.reset();
+			currentTimer.stop();
+			LIVE_CURRENT_FAIL_TIME = 0;
+		}
+
+		if (RESET_MOTOR_BEGIN && currentTimer.get() >= MOTOR_COOLDOWN_TIME) {
+			currentTimer.stop();
+			currentTimer.reset();
+			RESET_MOTOR_BEGIN = false;
+			SmartDashboard.putString("motorStatus", "RESTARTING MOTOR");
+
+		}
+	}
+
 	
 	public static void standardPosition() {
 		toggleRollers(0, 0);
-		moveArm(-6.66);//need correct number
-		
+		moveArm(-ARM_MOVE_SPEED);
 	}
-	
-	public static void intakeAndClamp() {
-		if(org.usfirst.frc.team245.robot.SensorsAndActuators.leftArmCloser.get() == false || org.usfirst.frc.team245.robot.SensorsAndActuators.rightArmCloser.get() == false){  
-				toggleArm(true);
+
+	public static void initIntakeAndClamp() {
+		intakeTimer.reset();
+		intakeTimer.start();
+	}
+
+	public static boolean intakeAndClamp() {
+		if (intakeStage == 0) {
+			if (SensorsAndActuators.photoEyeInternal.get()) {
+				toggleRollers(.5, .5);
+
+			} else {
+				toggleRollers(0,0);
+				intakeStage++;
+			}
+			moveArm(0);
 		}
-		
-		toggleRollers(1, 1);
-		toggleArm(false);
-		if(org.usfirst.frc.team245.robot.SensorsAndActuators.toteClamp.get() == true){
+		else if(intakeStage == 1){
+			initIntakeAndClamp();
 			toggleClamps(true);
+			moveArm(0);
+			intakeStage++;
 		}
-		moveArm(3.1415);//temporary number, need to determine speed
-		toggleClamps(false);
+		else if(intakeStage==2&&(intakeTimer.get()>1)){
+			if(getCurrentEncoder()<TOTE_ENCODER_HEIGHT){
+				moveArm(ARM_MOVE_SPEED);
+			}
+			else{
+				intakeStage++;
+			}
+		}
+		else if(intakeStage==3){
+			toggleRatchet(false);
+			moveArm(0);
+			intakeStage++;
+		}
+		else if(intakeStage==4){
+			if(getCurrentEncoder()<2*TOTE_ENCODER_HEIGHT){
+				moveArm(ARM_MOVE_SPEED);
+			}
+			else{
+				intakeStage++;
+			}
+		}
+		else if(intakeStage==5){
+			toggleRatchet(true);
+			moveArm(0);
+			intakeStage++;
+		}
+		else if(intakeStage==6){
+			toggleClamps(false);
+			moveArm(0);
+			intakeTimer.reset();
+			intakeStage++;
+		}
+		else if(intakeStage==7&&intakeTimer.get()>.5){
+			if(getCurrentEncoder()>0){
+				moveArm(-ARM_MOVE_SPEED);
+			}
+			else{
+				intakeStage = 0;
+				return true;
+			}
+		}
+		return false;
 	}
-	
-	public static void placeTotes() {
-		toggleRollers(0, 0);
-		toggleArm(true);
-		moveArm(1.337); //not actually 1337
-		toggleArm(false);
-		toggleClamps(false);
-		moveArm(-1.337); //same as above comment
-		toggleArm(true);
+	public static void initPlaceTotes(){
+		outputTimer.start();
+		outputTimer.reset();
 	}
-	
-	*/
-	public static void currentCheck() {
-		//take special action if motor stalls
-		//PowerDistributionPanel. //WHY DOESN'T THIS WORK 
-		//http://first.wpi.edu/FRC/roborio/release/docs/java/classedu_1_1wpi_1_1first_1_1wpilibj_1_1PowerDistributionPanel.html
-		amps = current.getCurrent(3);
-		SmartDashboard.putNumber("current",amps);
+	public static boolean placeTotes() { 
+		if(outputStage == 0){
+			if(getCurrentEncoder()<TOTE_ENCODER_HEIGHT){
+				moveArm(ARM_MOVE_SPEED);
+			}
+			else{
+				outputStage++;
+			}
+		}
+		else if(outputStage == 1){
+			toggleClamps(true);
+			initPlaceTotes();
+			moveArm(0);
+			outputStage++;
+		}
+		else if(outputStage==2&&outputTimer.get()>.5){
+			toggleRatchet(false);
+			outputStage++;
+			moveArm(0);
+		}
+		else if(outputStage==3){
+			if(getCurrentEncoder()>20){
+				moveArm(-ARM_MOVE_SPEED);
+			}
+			else{
+				outputStage++;
+			}
+		}
+		else if(outputStage==4){
+			toggleClamps(false);
+			moveArm(0);
+			return true;
+		}
+		return false;
 	}
+
 }
