@@ -2,6 +2,7 @@ package Interior;
 
 import org.usfirst.frc.team245.robot.SensorsAndActuators;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
@@ -23,7 +24,7 @@ public class Interior {
 	private static boolean RESET_MOTOR_BEGIN = false;
 	// private static double EXPECTED_ITERATION = 0;
 	// private static double CURRENT_ITERATION = 0;
-	private static double ARM_MOVE_SPEED = .8;
+	private static double ARM_MOVE_SPEED = .5;
 	private static int PDP_PORT = 3;
 	private static int intakeStage = 0;
 	private static int outputStage = 0;
@@ -79,16 +80,23 @@ public class Interior {
 	}
 
 	// clamps using the piston
-	public static void toggleClamps(boolean isCompressed) {
+	public static void toggleRollers(boolean isCompressed) {
 		if (isCompressed) { // currently closed
 			// open Arms
-			SensorsAndActuators.clampPiston.set(false);
+			SensorsAndActuators.rollerPiston.set(false);
 		} else { // currently open
 			// close Arms
-			SensorsAndActuators.clampPiston.set(true);
+			SensorsAndActuators.rollerPiston.set(true);
 		}
 	}
-
+	public static void toggleClamps(boolean isCompressed){
+		if(!isCompressed){
+		SensorsAndActuators.internalToteClamp.set(DoubleSolenoid.Value.kOff);
+		}
+		else{
+			SensorsAndActuators.internalToteClamp.set(DoubleSolenoid.Value.kOff);
+		}
+	}
 	
 	public static void currentCheck() { // each iteration = 20 milliseconds
 		// take special action if motor stalls

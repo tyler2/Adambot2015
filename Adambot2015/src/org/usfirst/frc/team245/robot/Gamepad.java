@@ -57,7 +57,8 @@ public class Gamepad {
 	 * XBOX 360 Trigger Axis (right - left)
 	 */
 	
-	public static final int AXIS_TRIGGERS = 3;
+	public static final int AXIS_TRIGGERSL = 2;
+	public static final int AXIS_TRIGGERSR = 3;
 	/**
 	 * XBOX 360 Right Horizontal Axis (Left=-1, Right=1)
 	 */
@@ -86,7 +87,7 @@ public class Gamepad {
 	}
 
 	public double getTriggers() {
-		return deaden(joy.getRawAxis(AXIS_TRIGGERS) * 2) / 2;
+		return deaden(joy.getRawAxis(AXIS_TRIGGERSL) + joy.getRawAxis(AXIS_TRIGGERSR));
 	}
 
 	public boolean getDPadLeft() {

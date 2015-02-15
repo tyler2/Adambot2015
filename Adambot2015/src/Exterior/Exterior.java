@@ -4,6 +4,7 @@ import org.usfirst.frc.team245.robot.SensorsAndActuators;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Exterior {	
 	private static Timer timer = new Timer();
@@ -22,10 +23,12 @@ public class Exterior {
 		}
 	}
 	public static void moveArm(double speed){
+		SmartDashboard.putNumber("arm speed", speed);
 		if(speed>0){
 			SensorsAndActuators.liftBrake.set(false);
 			if(SensorsAndActuators.exteriorManipulator.get()<ARM_ENCODER_MAX
 					&& !SensorsAndActuators.exteriorTopLimit.get()){
+				SmartDashboard.putNumber("DEBUG MOVEARM CASE 1", SensorsAndActuators.exteriorManipulator.get()); 
 				SensorsAndActuators.exteriorLiftMotor.set(speed);
 			}
 			else{
@@ -34,8 +37,8 @@ public class Exterior {
 		}
 		else if (speed<0){
 			SensorsAndActuators.liftBrake.set(false);
-			if(SensorsAndActuators.exteriorManipulator.get()<0
-					&& !SensorsAndActuators.exteriorBottomLimit.get()){
+			if(SensorsAndActuators.exteriorManipulator.get()>=-5
+					 && !SensorsAndActuators.exteriorBottomLimit.get()){
 				SensorsAndActuators.exteriorLiftMotor.set(speed);
 			}
 			else{
@@ -43,8 +46,12 @@ public class Exterior {
 			}
 		}
 		else{
-			SensorsAndActuators.liftBrake.set(true);
+			// TODO SensorsAndActuators.liftBrake.set(true);
+			SensorsAndActuators.exteriorLiftMotor.set(0);
 		}
+		SmartDashboard.putNumber("Encoder Value", SensorsAndActuators.exteriorManipulator.getDistance());
+		SmartDashboard.putBoolean("Top Limit", SensorsAndActuators.exteriorTopLimit.get());
+		SmartDashboard.putBoolean("Bottom Limit", SensorsAndActuators.exteriorBottomLimit.get());
 	}
 	public static void rotateArm(double speed){
 		if(speed ==0){
@@ -61,8 +68,10 @@ public class Exterior {
 				SensorsAndActuators.exteriorRotationMotor.set(0);
 			}
 		}
+		SmartDashboard.putNumber("hall effects encoder value", SensorsAndActuators.exteriorRotationEncoder.get());
 	}
 	public static void clampAndRiseInit(){
+		timer.reset();
 		timer.start();
 	}
 	public static boolean clampAndRise(){
@@ -70,7 +79,7 @@ public class Exterior {
 			Exterior.setClamps(true);
 		}
 		else{
-			Exterior.moveArm(.8);
+			Exterior.moveArm(.4);
 			if(timer.get()>2.5){
 				return true;
 			}

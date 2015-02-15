@@ -28,16 +28,19 @@ public class Robot extends IterativeRobot {
     @Override
 	public void robotInit() {
     	
-    	SensorsAndActuators.compressor.start();
+    	//SensorsAndActuators.compressor.start();
     	
     	SmartDashboard.putString("Init Completed", " ");
     	//cam.camerasInit();
     	//Auton.LandmarkPlacement.init();    	
     	//SensorsAndActuators.initialize();    
     	SensorsAndActuators.initialize();
-    	Drive.Drive.init();
-    	Drive.Drive.roiInit();
-    	
+    	SensorsAndActuators.compressor.start();
+    	SmartDashboard.putBoolean("TOP LIMIT INIT", SensorsAndActuators.exteriorTopLimit.get());
+    	SmartDashboard.putBoolean("BOTTOM LIMIT INIT", SensorsAndActuators.exteriorBottomLimit.get());
+    	//Drive.Drive.init();
+    	//Drive.Drive.roiInit();
+    	//ControlsTest.timer.start();
     }
     
     @Override
@@ -57,7 +60,7 @@ public class Robot extends IterativeRobot {
     	//Only one of the two is called, eventually smartdash will decide
     	//LandmarkPlacement.update();
     	
-    	Auton.Test.update();
+    	//Auton.Test.update();
     }
 
     /**
@@ -65,15 +68,17 @@ public class Robot extends IterativeRobot {
      */   
     @Override
 	public void teleopPeriodic() {
-        try{
+//        try{
         	Teleop.doWerk();        
         	//Auton.Test.update();
-        	
+        	//ControlsTest.update();
         	//SmartDashboard.putNumber("Halleffect encoder", SensorsAndActuators.exteriorRotationEncoder.get());
-        }
-        catch(Exception e){
-        	SmartDashboard.putString("the exception was:", e.toString());
-        }    	
+        	//SensorsAndActuators.ratchetPiston.set(true);
+//        }
+//        catch(Exception e){
+//        	SmartDashboard.putString("the exception was:", e.toString());
+//        	e.printStackTrace();
+//        }    	
     }
     
     /**
@@ -81,7 +86,9 @@ public class Robot extends IterativeRobot {
      */
     @Override
 	public void testPeriodic() {
-    
+    	
+    	
+    	
     }
     
     @Override
@@ -92,6 +99,8 @@ public class Robot extends IterativeRobot {
     	SmartDashboard.putString("Writing x", Drive.Drive.xValues.toString());
 		SmartDashboard.putString("Writing y", Drive.Drive.yValues.toString() );
 		SmartDashboard.putString("Writing z", Drive.Drive.rotationValues.toString() );
+		SmartDashboard.putBoolean("TOP LIMIT INIT", SensorsAndActuators.exteriorTopLimit.get());
+    	SmartDashboard.putBoolean("BOTTOM LIMIT INIT", SensorsAndActuators.exteriorBottomLimit.get());
 		
     }
    

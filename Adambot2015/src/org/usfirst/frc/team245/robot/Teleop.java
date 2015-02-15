@@ -15,15 +15,16 @@ public class Teleop {
 	public static boolean placeTotes = false;
 	/*public static File file = new File("GhostMode.txt");
 	public static FileWriter f;*/
+	
 	public static void doWerk() {		
 		//DRIVE
-		drive();
+		// TODO drive();
 		
 		//EXTERIOR
 		exterior();
 		
 		//interior
-		interior();
+		//interior();
 	}
 
 	public static void drive(){
@@ -41,12 +42,18 @@ public class Teleop {
 			exteriorLockAndLift=!Exterior.Exterior.clampAndRise();
 		}
 		if(Gamepad.secondary.getA()){
-			Exterior.Exterior.rotateArm(-.6);
+			Exterior.Exterior.rotateArm(-.5);
 		}
 		if(Gamepad.secondary.getY()){
-			Exterior.Exterior.rotateArm(.6);
+			Exterior.Exterior.rotateArm(.5);
 		}
-		Exterior.Exterior.moveArm(Gamepad.secondary.getRightY());
+		Exterior.Exterior.moveArm(-.5*Gamepad.secondary.getRightY());
+		if(Gamepad.secondary.getTriggers()>.3){
+			Exterior.Exterior.setClamps(true);
+		}
+		else{
+			Exterior.Exterior.setClamps(false);
+		}
 	}
 	public static void interior(){
 		if(Gamepad.secondary.getX()){
@@ -58,10 +65,22 @@ public class Teleop {
 		if(Gamepad.secondary.getLB()||Gamepad.secondary.getRB()){
 			placeTotes = true;
 		}
-		if(exteriorLockAndLift){
+		if(interiorLift){
 			placeTotes = !Interior.Interior.placeTotes();
 		}
-		Interior.Interior.moveArm(Gamepad.secondary.getLeftY());
+		Interior.Interior.moveArm(.5*Gamepad.secondary.getLeftY());
+		if(Gamepad.primary.getY()){
+			Interior.Interior.toggleRollers(1, 1);
+		}
+		if(Gamepad.primary.getB()){
+			Interior.Interior.toggleRollers(0, 1);
+		}
+		if(Gamepad.primary.getX()){
+			Interior.Interior.toggleRollers(1, 0);
+		}
+		if(Gamepad.primary.getA()){
+			Interior.Interior.toggleRollers(-1, -1);
+		}
 		
 	}
 	/*
